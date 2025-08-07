@@ -44,4 +44,16 @@ export default class UsersController {
         await user.delete()
         return response.status(200).send({ message: 'User deleted successfully' })
     }
+
+    public async login({ request, response }: HttpContext) {
+        const { email, password } = request.only(['email', 'password'])
+        const user = await User.query().where('email', email).first()
+        
+        if (!user || user.password !== password) {
+            return response.status(401).send({ message: 'Invalid credentials' })
+        }
+        
+        // Here you would typically generate a token or session for the user
+        return response.status(200).send({ message: 'Login successful', user })
+    }
 }
