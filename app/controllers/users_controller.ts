@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import User from '#models/user'
 import { createUserValidator, updateUserValidator } from '#validators/user'
+import Hash from '@adonisjs/core/services/hash'
 
 export default class UsersController {
     public async index({ response }: HttpContext) {
@@ -20,7 +21,12 @@ export default class UsersController {
     public async create({ request, response }: HttpContext) {
         const userData = await createUserValidator.validate(request.only(['username', 'email', 'password', 'favorite_artist_id']))
         const user = await User.create(userData)
-        return response.status(201).send(user)
+        const token = await User.accessTokens.create(user)
+        return response.status(201).send({
+            message : 'User created successfully',
+            user,
+            token,
+        })
     }
     
     public async update({ params, request, response }: HttpContext) {
@@ -48,12 +54,21 @@ export default class UsersController {
     public async login({ request, response }: HttpContext) {
         const { email, password } = request.only(['email', 'password'])
         const user = await User.query().where('email', email).first()
-        
-        if (!user || user.password !== password) {
+
+        if (!user) {
             return response.status(401).send({ message: 'Invalid credentials' })
         }
-        
-        // Here you would typically generate a token or session for the user
-        return response.status(200).send({ message: 'Login successful', user })
+
+        const isPasswordValid = await Hash.verify(user.password, password)
+        if (!isPasswordValid) {
+            return response.status(401).send({ message: 'Invalid credentials' })
+        }
+
+        const token = await User.accessTokens.create(user)
+        return response.status(200).send({
+            message: 'Login successful',
+            user,
+            token,
+        })
     }
 }
