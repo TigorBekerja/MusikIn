@@ -14,3 +14,11 @@ router.get('/', async () => {
     hello: 'world',
   }
 })
+
+import UserController from '#controllers/users_controller'
+
+router.get('/users', [UserController, 'index'])
+router.get('/users/:id', [UserController, 'show'])
+router.post('/users', [UserController, 'create'])
+router.put('/users/:id', [UserController, 'update'])
+router.delete('/users/:id', [UserController, 'delete'])
