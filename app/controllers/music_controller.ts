@@ -1,7 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import music from '#models/music'
 import { createMusicValidator } from '#validators/music'
-
+import History from '#models/history'
 
 export default class MusicInPlaylistsController {
     public async index({ request, response }: HttpContext) {
@@ -60,7 +60,7 @@ export default class MusicInPlaylistsController {
         await musicItem.delete()
         return response.status(200).send({ message: 'Music deleted successfully' })
     }
-    public async play({ params, response }: HttpContext) {
+    public async play({ params, auth, response }: HttpContext) {
         const musicId = params.id
         const musicItem = await music.find(musicId)
         if (!musicItem) {
@@ -68,6 +68,29 @@ export default class MusicInPlaylistsController {
         }
         musicItem.num_played += 1 // Increment the play count
         await musicItem.save()
+
+        try {
+            await auth.authenticate()
+        } catch (error) {
+            return response.status(200).send({ message: 'Authentication failed, playing music without history', music: musicItem })
+        }
+        
+        if (auth.isAuthenticated && auth.user) {
+            const history = await History.query().where({
+                user_id: auth.user.id,
+                music_id: musicItem.id
+            }).first()
+            if (history) {
+                history.num_played += 1 // Increment the play count in history
+                await history.save()
+            } else {
+                await History.create({
+                    user_id: auth.user.id,
+                    music_id: musicItem.id,
+                    num_played: 1
+                })
+            }
+        }
         return response.status(200).send({ message: 'Playing music', music: musicItem })
     }
 }
