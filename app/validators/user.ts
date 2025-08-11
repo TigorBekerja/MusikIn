@@ -1,15 +1,4 @@
-import vine, {SimpleMessagesProvider} from '@vinejs/vine'
-
-const messages = { 
-    required: 'The {{ field }} field is required',
-    string: 'The {{ field }} field must be a string',
-    minLength : 'The {{ field }} field must be at least {{ min }} characters long',
-    maxLength : 'The {{ field }} field must not exceed {{ max }} characters long',
-    email : 'The {{ field }} field must be a valid email address',
-    unique : 'The {{ field }} field must be unique',
-}
-
-vine.messagesProvider = new SimpleMessagesProvider(messages)
+import vine from '@vinejs/vine'
 
 export const createUserValidator = vine.compile(
     vine.object({
@@ -28,4 +17,3 @@ export const updateUserValidator = vine.compile(
         favorite_artist_id: vine.number().optional()
     })
 )
-
