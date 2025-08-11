@@ -16,11 +16,18 @@ router.get('/', async () => {
 })
 
 import UserController from '#controllers/users_controller'
+import { middleware } from './kernel.js'
 
 router.get('/users', [UserController, 'index'])
 router.get('/users/:id', [UserController, 'show'])
-router.post('/users', [UserController, 'create'])
-router.put('/users/:id', [UserController, 'update'])
-router.delete('/users/:id', [UserController, 'delete'])
 router.post('/users/login', [UserController, 'login'])
 router.post('/users/register', [UserController, 'create'])
+
+router.group(() => {
+  router.delete('/users', [UserController, 'delete'])
+  router.put('/users', [UserController, 'update'])
+  router.post('/users/logout', [UserController, 'logout'])
+  router.post('/users/profile', [UserController, 'profile'])
+}).use(middleware.auth({
+  guards: ['api']
+}))

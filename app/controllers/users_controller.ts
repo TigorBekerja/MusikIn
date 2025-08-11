@@ -21,33 +21,28 @@ export default class UsersController {
     public async create({ request, response }: HttpContext) {
         const userData = await createUserValidator.validate(request.only(['username', 'email', 'password', 'favorite_artist_id']))
         const user = await User.create(userData)
-        const token = await User.accessTokens.create(user)
         return response.status(201).send({
             message : 'User created successfully',
             user,
-            token,
         })
     }
     
-    public async update({ params, request, response }: HttpContext) {
+    public async update({request, auth, response }: HttpContext) {
         const userData = await updateUserValidator.validate(request.only(['username', 'email', 'password', 'favorite_artist_id']))
-        const userId = params.id
-        const user = await User.find(userId)
-        if (!user) {
-            return response.status(404).send({ message: 'User not found' })
+        if (!auth.isAuthenticated) {
+            return response.status(401).send({ message: 'Unauthorized' })
         }
-        user.merge(userData)
-        await user.save()
-        return response.status(200).send(user)
+
+        auth.user?.merge(userData)
+        await auth.user?.save()
+        return response.status(200).send(auth.user)
     }
     
-    public async delete({ params, response }: HttpContext) {
-        const userId = params.id
-        const user = await User.find(userId)
-        if (!user) {
-            return response.status(404).send({ message: 'User not found' })
+    public async delete({auth, response }: HttpContext) {
+        if (!auth.isAuthenticated) {
+            return response.status(401).send({ message: 'Unauthorized' })
         }
-        await user.delete()
+        await auth.user?.delete()
         return response.status(200).send({ message: 'User deleted successfully' })
     }
 
@@ -70,5 +65,20 @@ export default class UsersController {
             user,
             token,
         })
+    }
+
+    public async profile({ auth, response }: HttpContext) {
+        if (!auth.isAuthenticated) {
+            return response.status(401).send({ message: 'Unauthorized' })
+        }
+        return response.status(200).send(auth.user)
+    }
+
+    public async logout({ auth, response }: HttpContext) {
+        if (!auth.isAuthenticated) {
+            return response.status(401).send({ message: 'Unauthorized' })
+        }
+        await auth.use('api').invalidateToken()
+        return response.status(200).send({ message: 'Logged out successfully' })
     }
 }
