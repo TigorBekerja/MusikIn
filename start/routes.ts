@@ -43,3 +43,11 @@ router.group(() => {
 }).use(middleware.auth({
   guards: ['api']
 }))
+
+import HistoriesController from '#controllers/histories_controller'
+router.group(() => {
+  router.get('/histories', [HistoriesController, 'index'])
+  router.delete('/histories/:id', [HistoriesController, 'delete'])
+}).use(middleware.auth({
+  guards: ['api']
+}))
