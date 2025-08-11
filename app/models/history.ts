@@ -1,5 +1,9 @@
 import { DateTime } from 'luxon'
 import { BaseModel, column } from '@adonisjs/lucid/orm'
+import User from '#models/user'
+import Music from '#models/music'
+import type { BelongsTo } from '@adonisjs/lucid/types/relations'
+import { belongsTo } from '@adonisjs/lucid/orm'
 
 export default class History extends BaseModel {
   @column({ isPrimary: true })
@@ -19,4 +23,10 @@ export default class History extends BaseModel {
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime
+
+  @belongsTo(() => User, { foreignKey: 'user_id' })
+  declare user: BelongsTo<typeof User>
+
+  @belongsTo(() => Music, { foreignKey: 'music_id' })
+  declare music: BelongsTo<typeof Music>
 }
