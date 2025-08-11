@@ -2,7 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import User from '#models/user'
 import { createUserValidator, updateUserValidator } from '#validators/user'
 import Hash from '@adonisjs/core/services/hash'
-
+import db from '@adonisjs/lucid/services/db'
 export default class UsersController {
     public async index({ response }: HttpContext) {
         const users = await User.all()
@@ -47,13 +47,18 @@ export default class UsersController {
     }
 
     public async login({ request, response }: HttpContext) {
+        
+
         const { email, password } = request.only(['email', 'password'])
         const user = await User.query().where('email', email).first()
-
+        
         if (!user) {
             return response.status(401).send({ message: 'Invalid credentials' })
         }
-
+        const activeTokens = await db.from('auth_access_tokens').where('tokenable_id', user.id).first()
+        if (activeTokens) {
+            return response.status(403).send({ message: 'User already logged in' })
+        }
         const isPasswordValid = await Hash.verify(user.password, password)
         if (!isPasswordValid) {
             return response.status(401).send({ message: 'Invalid credentials' })
