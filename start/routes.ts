@@ -31,3 +31,15 @@ router.group(() => {
 }).use(middleware.auth({
   guards: ['api']
 }))
+
+import MusicController from '#controllers/music_controller'
+
+router.get('/music', [MusicController, 'index'])
+router.get('/music/:id', [MusicController, 'show'])
+router.post('/music/play/:id', [MusicController, 'play'])
+router.group(() => {
+  router.post('/music', [MusicController, 'create'])
+  router.delete('/music/:id', [MusicController, 'delete'])
+}).use(middleware.auth({
+  guards: ['api']
+}))
