@@ -57,13 +57,12 @@ export default class UsersController {
         }
         const activeTokens = await db.from('auth_access_tokens').where('tokenable_id', user.id).first()
         if (activeTokens) {
-            return response.status(403).send({ message: 'User already logged in' })
+            await User.accessTokens.delete(user, activeTokens.id)
         }
         const isPasswordValid = await Hash.verify(user.password, password)
         if (!isPasswordValid) {
             return response.status(401).send({ message: 'Invalid credentials' })
         }
-
         const token = await User.accessTokens.create(user)
         return response.status(200).send({
             message: 'Login successful',
