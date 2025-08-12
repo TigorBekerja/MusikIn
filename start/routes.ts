@@ -51,3 +51,16 @@ router.group(() => {
 }).use(middleware.auth({
   guards: ['api']
 }))
+
+import PlaylistsController from '#controllers/playlists_controller'
+router.group(() => {
+  router.post('/playlists', [PlaylistsController, 'create'])
+  router.get('/playlists', [PlaylistsController, 'index'])
+  router.get('/playlists/:id', [PlaylistsController, 'show'])
+  router.delete('/playlists/:id', [PlaylistsController, 'destroy'])
+  router.put('/playlists/:id', [PlaylistsController, 'update'])
+  router.post('/playlists/:p_id/music', [PlaylistsController, 'addMusicToPlaylist'])
+  router.delete('/playlists/:p_id/music', [PlaylistsController, 'removeMusicFromPlaylist'])
+}).use(middleware.auth({
+  guards: ['api']
+}))
