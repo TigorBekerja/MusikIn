@@ -1,9 +1,8 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column } from '@adonisjs/lucid/orm'
+import { BaseModel, column, belongsTo } from '@adonisjs/lucid/orm'
 import User from '#models/user'
 import Music from '#models/music'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
-import { belongsTo } from '@adonisjs/lucid/orm'
 
 export default class History extends BaseModel {
   @column({ isPrimary: true })
