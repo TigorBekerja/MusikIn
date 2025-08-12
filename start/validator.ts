@@ -10,4 +10,5 @@ vine.messagesProvider = new SimpleMessagesProvider({
   'unique': 'The {{ field }} field must be unique',
   'number': 'The {{ field }} field must be a number',
   'min': 'The {{ field }} field must be at least {{ min }}',
+  'boolean': 'The {{ field }} field must be a boolean'
 })
